@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Head content remains unchanged -->
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Tabular ChatBot</title>
+  <!-- MDB icon -->
+  <link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" />
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+  <!-- MDB -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    /* Add any additional styling here */
+  </style>
+</head>
+
+<body>
+  <section style="background-color: #eee;">
+    <div class="container py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-8 col-lg-6 col-xl-4">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center p-3"
+              style="border-top: 4px solid #ffa900;">
+              <!-- <h5 class="mb-0">Chat messages</h5> -->
+              <h5 class="mb-0">Chat Agent</h5>
+              
+              <div class="d-flex flex-row align-items-center">
+                <!-- <span class="badge bg-warning me-3">20</span>
+                <i class="fas fa-minus me-3 text-muted fa-xs"></i>
+                <i class="fas fa-comments me-3 text-muted fa-xs"></i> -->
+                <i class="fas fa-times text-muted fa-xs"></i>
+              </div>
+            </div>
+            <div class="card-body" style="height: 400px; overflow-y: auto;">
+              <!-- Chat messages will appear here -->
+            </div>
+            <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+              <div class="input-group mb-0">
+                <input type="text" class="form-control" placeholder="Type message" aria-label="Recipient's username"
+                  aria-describedby="button-addon2" />
+                <button class="btn btn-warning" type="button" id="button-addon2" style="padding-top: .55rem;">
+                  Send
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    $(document).ready(function () {
+
+        $('.fa-times').click(function () {
+      window.location.href = '/'; // Redirect to the index page
+    });
+
+        function sendInitialBotMessage() {
+      $.ajax({
+        type: 'POST',
+        url: '/get_initial_bot_response', // Update the endpoint to fetch initial bot response
+        success: function (response) {
+          var formattedDate = new Date().toLocaleString();
+          var botResponse = `
+            <div class="d-flex justify-content-start mb-4 pt-1">
+              <img src="{{url_for('static', filename='chatbot.png')}}" alt="avatar" style="width: 45px; height: 100%;">
+              <div>
+                <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${response.bot_response}</p>
+                <p class="small text-muted">${formattedDate}</p>
+              </div>
+            </div>
+          `;
+          $('.card-body').append(botResponse);
+          var chatBody = $('.card-body');
+          chatBody.scrollTop(chatBody[0].scrollHeight);
+        },
+        error: function (error) {
+          console.log(error);
+        }
+      });
+    }
+
+    // Send initial bot message when the page loads
+    sendInitialBotMessage();
+    
+      $('#button-addon2').click(function () {
+        var userInput = $('.form-control').val();
+        if (userInput !== '') {
+          var currentDate = new Date();
+          var formattedDate = currentDate.toLocaleString();
+
+          // User message
+          var userMessage = `
+            <div class="d-flex justify-content-end mb-4 pt-1">
+              <div>
+                <p class="small p-2 me-3 mb-3 text-white rounded-3 bg-warning">${userInput}</p>
+                <p class="small text-muted">${formattedDate}</p>
+              </div>
+              <img src="{{url_for('static', filename='user.png')}}" alt="avatar"
+                style="width: 45px; height: 100%;">
+            </div>
+          `;
+          $('.card-body').append(userMessage);
+
+          // AJAX call to Flask endpoint for bot response
+          $.ajax({
+            type: 'POST',
+            url: '/get_bot_response',
+            data: JSON.stringify({ userInput: userInput }), // Send user input to server
+            contentType: 'application/json',
+            success: function (response) {
+              var botResponse = `
+                <div class="d-flex justify-content-start mb-4 pt-1">
+                  <img src="{{url_for('static', filename='chatbot.png')}}" alt="avatar"
+                    style="width: 45px; height: 100%;">
+                  <div>
+                    <p class="small p-2 ms-3 mb-3 rounded-3" style="background-color: #f5f6f7;">${response.bot_response}</p>
+                    <p class="small text-muted">${formattedDate}</p>
+                  </div>
+                </div>
+              `;
+              setTimeout(function () {
+                $('.card-body').append(botResponse);
+                var chatBody = $('.card-body');
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+              }, 500);
+            },
+            error: function (error) {
+              console.log(error);
+            }
+          });
+
+          // Clear input field after sending message
+          $('.form-control').val('');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

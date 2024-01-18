@@ -1,0 +1,6 @@
+flask
+pandas
+langchain
+langchain_experimental
+openai
+tabulate

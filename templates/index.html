@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tabular ChatBot</title>
+    <style>
+        body {
+            /* display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0; */
+            background:#eee;
+        }
+        .body_like {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            margin: 0;
+        }
+        
+        .app-name {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .app-icon {
+            width: 50px; /* Adjust as needed */
+            height: auto;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .container {
+            display: flex;
+            width: 80%;
+        }
+        .left-side {
+            flex: 1;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+        }
+        .right-side {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto; /* Enable vertical scrollbar */
+            max-height: 400px; /* Set a fixed height */
+        }
+        .scrambled-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .scrambled-button {
+            padding: 10px 15px;
+            border: none;
+            background-color:  #ffc107;
+            color: black;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .scrambled-button:hover {
+            transform: scale(1.1);
+        }
+        input[type="file"]:hover {
+            transform: scale(1.1);
+        }
+        input[type="password"]:hover {
+            transform: scale(1.1);
+        }
+
+
+        #startChatButton{
+        opacity: 0;
+        animation: fadeInOut 2s linear infinite;
+        font-weight: bold;
+        background-color:  blue;
+        color: white;
+        }
+
+        @keyframes fadeInOut {
+        0%, 100% {
+            opacity: 0.5;
+        }
+        50% {
+            opacity: 1;
+        }
+        }
+
+
+
+    </style>
+    
+</head>
+<body>
+    <div class="app-name">
+        <img src="{{url_for('static', filename='chatbot.png')}}" alt="App Icon" class="app-icon">
+        <h2>Tabular ChatBot</h2>
+    </div>
+
+    <div class="body_like">
+    <div class="container">
+        <div class="left-side">
+            <h4>Enter your Open AI API key and tabular data in a .csv file to access insights via conversation.</h4>
+            <form action="/" method="post" enctype="multipart/form-data">
+                <input type="password" name="api_key" placeholder="Enter API Key"><br><br>
+                <input type="file" name="csv_file" accept=".csv"><br><br>
+                <input type="submit" value="Display Tabular Data" class="scrambled-button">
+            </form>
+            {% if error %}
+            <p>{{ error }}</p>
+            {% endif %}
+
+            {% if column_info %}
+            <br><br>
+            <form action="{{ url_for('start_chat') }}" method="get" id="startChatForm">
+                <input type="hidden" name="start_chat" value="true">
+                <button class="scrambled-button" id="startChatButton">Start Chat</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="right-side">
+            {% if column_info %}
+            <h4>Below, you will discover a list of various column names and their corresponding data types found in the uploaded CSV file.</h4>
+            <div class="scrambled-buttons">
+                {% for key, value in column_info.items() %}
+                <button class="scrambled-button">{{ key }}: {{ value }}</button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+    <script>
+        document.getElementById('startChatButton').addEventListener('click', function() {
+            document.getElementById('startChatForm').submit();
+        });
+    </script>
+</body>
+</html>
